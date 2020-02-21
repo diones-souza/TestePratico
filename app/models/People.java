@@ -2,6 +2,7 @@ package models;
 
 import javax.persistence.*;
 import play.db.jpa.Model;
+import play.data.validation.*;
 
 @Entity
 public class People extends Model{
@@ -10,8 +11,15 @@ public class People extends Model{
     @GeneratedValue(strategy = GenerationType.AUTO)
     public Long id;
 
+    @Required
+    @MinSize(value=3, message="O tamanho mínimo é 3")
+    //campo obrigatório, no mínimo 3 caracteres
     public String name;
 
+    @Required
+    @Min(value=16, message="Não pode ser inferior a 16")
+    @Max(value=64, message="Não pode ser superior a 64")
+    //campo obrigatório, no mínimo 16 no máximo 64
     public Integer age;
 
     public Long getId() {

@@ -16,6 +16,7 @@
     <h5 class="card-header text-white bg-primary animated fadeInDown">Cadastrar pessoa</h5>
     <div class="card-body">
         <form action="@{Person.save}">
+
             <div class="form-group">
                 <label>Código</label>
                 <input type="text" name="person.id" value="${person?.id}" class="form-control" hidden>
@@ -23,13 +24,18 @@
             </div>
             <div class="form-group">
                 <label>Nome</label>
-                <input type="text" id="name" name="person.name" value="${person?.name}" class="form-control">
+                <input type="text" id="name" name="person.name" value="${person?.name}" class="form-control mb-2">
+                <span class="alert-danger m-2">
+                    #{error 'person.name' /}
+                </span>
             </div>
             <div class="form-group">
                 <label>Idade</label>
-                <input type="number" id="age" name="person.age" value="${person?.age}" class="form-control">
+                <input type="number" id="age" name="person.age" value="${person?.age}" class="form-control mb-2">
+                <span class="alert-danger m-2">
+                    #{error 'person.age' /}
+                </span>
             </div>
-
             <div class="float-right">
                 <button type="submit" class="btn btn-primary">Salvar</button>
             </div>
