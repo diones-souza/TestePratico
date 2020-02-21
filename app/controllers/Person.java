@@ -3,13 +3,18 @@ package controllers;
 import play.*;
 import play.mvc.*;
 import play.data.validation.*;
+import play.cache.*;
 import java.util.*;
 import models.People;
 
 public class Person extends Controller {
 
     public static void index() {
-        render();
+        //pegar model no cache
+        People person = (People)Cache.get("person");
+        //limpa o model do cache
+        Cache.set("person", null);
+        render(person);
     }
 
     public static void list() {
@@ -22,8 +27,9 @@ public class Person extends Controller {
         //verificar se há erros
         if(validation.hasErrors()){
             //guardar mensagens de erros
-            params.flash();
             validation.keep();
+            //guardar model no cache
+            Cache.set("person",person);
             index();
         }
         person.save();
