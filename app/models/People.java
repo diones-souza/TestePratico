@@ -13,14 +13,19 @@ public class People extends Model{
 
     @Required
     @MinSize(value=3, message="O campo tem que ter mínimo 3 caracteres")
+    @MaxSize(value=40, message="O campo pode ter no máximo 40 caracteres")
     //campo obrigatório, no mínimo 3 caracteres
     public String name;
 
     @Required
-    @Min(value=16, message="O campo não pode ser inferior a 16")
-    @Max(value=64, message="O campo não pode ser superior a 64")
+    @Min(value=14, message="O campo não pode ser inferior a 16")
+    @Max(value=80, message="O campo não pode ser superior a 80")
     //campo obrigatório, no mínimo 16 no máximo 64
     public Integer age;
+
+    public Integer uf;
+
+    public Integer city;
 
     public Long getId() {
         return id;
@@ -44,5 +49,21 @@ public class People extends Model{
 
     public void setAge(Integer age) {
         this.age = age;
+    }
+
+    public Integer getUf() {
+        return uf;
+    }
+
+    public void setUf(Integer uf) {
+        this.uf = uf;
+    }
+
+    public Integer getCity() {
+        return city;
+    }
+
+    public void setCity(Integer city) {
+        this.city = city;
     }
 }
