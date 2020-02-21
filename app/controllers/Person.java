@@ -28,6 +28,7 @@ public class Person extends Controller {
         if(validation.hasErrors()){
             //guardar mensagens de erros
             validation.keep();
+            flash.error("Erro ao salvar registro");
             //guardar model no cache
             Cache.set("person",person);
             index();
