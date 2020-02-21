@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>#{get 'title' /}</title>
+        <meta charset="${_response_encoding}">
+        <link rel="stylesheet" media="screen" href="@{'/public/css/main.css'}">
+        #{get 'moreStyles' /}
+        <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="@{'/public/css/animate.min.css'}" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" />
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.51/jquery.form.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"></script>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">
+                <img src="@{'/public/images/play.png'}" width="30" height="40" class="d-inline-block align-center">
+                Play
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li id="register" class="nav-item">
+                        <a class="nav-link" href="/">Cadastro </a>
+                    </li>
+                    <li id="list" class="nav-item">
+                        <a class="nav-link" href="/people">Listar </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="container mt-4">
+            #{doLayout /}
+            #{get 'moreScripts' /}
+        </div>
+    </body>
+</html>
+<script type="text/javascript">
+    $(document).ready(function () {
+		let host = location.pathname
+		host = host.replace('/','')
+		if(host == '' || !isNaN(host)){
+			$("#register").addClass("active")
+			$("#list").removeClass("active")
+		}else{
+			if(host == 'people'){
+				$("#list").addClass("active")
+				$("#register").removeClass("active")
+			}
+		}
+	});
+</script>

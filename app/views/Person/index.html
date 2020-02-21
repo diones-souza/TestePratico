@@ -1,0 +1,113 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+<div class="alert alert-success alert-dismissible fade show animated zoomIn d-none" role="alert">
+    <strong></strong>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<div class="alert alert-danger alert-dismissible fade show animated zoomIn d-none" role="alert">
+    <strong></strong>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<div class="card">
+    <h5 class="card-header text-white bg-primary animated fadeInDown">Cadastrar pessoa</h5>
+    <div class="card-body">
+        <form method="POST" action="/" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Código</label>
+                <input type="text" id="id" name="id" class="form-control" hidden>
+                <input type="text" name="id" class="form-control" disabled>
+            </div>
+            <div class="form-group">
+                <label>Nome</label>
+                <input type="text" id="name" name="name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Idade</label>
+                <input type="number" id="age" name="age" class="form-control">
+            </div>
+
+            <div id="progressBar" class="form-group">
+                <div>
+                    <div class="progress">
+                        <div class="bar progress-bar-striped progress-bar-animated bg-success"></div >
+                    </div>
+                    <div class="text-center">
+                        <div class="percent">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="float-right">
+                <button id="barProgress" type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+
+	$(document).ready(function () {
+		document.getElementById('progressBar').style.display = "none"
+	});
+
+	$('#barProgress').click(function () {
+		document.getElementById('progressBar').style.display = "inline"
+	});
+
+	(function() {
+
+		var bar = $('.bar')
+		var percent = $('.percent')
+		var status = $('#status')
+		var nameFile = ''
+		$('form').ajaxForm({
+			beforeSend: function() {
+			    document.getElementById('barProgress').disabled = true
+				status.empty()
+				var percentVal = '0%'
+				bar.width(percentVal)
+				percent.html(percentVal)
+			},
+			uploadProgress: function(event, position, total, percentComplete) {
+				var percentVal = percentComplete + '%'
+				bar.width(percentVal)
+				percent.html(percentVal)
+			},
+			success: function(data) {
+				var percentVal = '100%'
+				nameFile = data
+				bar.width(percentVal)
+				percent.html(percentVal)
+
+			},
+			complete: function(xhr) {
+			    setTimeout(function(){
+                   document.getElementById('progressBar').style.display = "none";
+                },1300)
+			    if(xhr.status < 400){
+			        $('.alert-success strong').empty()
+                    $('.alert-success').removeClass('d-none')
+                    $(".alert-success strong").append("Registro excluido.")
+                    setTimeout(function(){
+                        $('.alert-success').addClass('d-none')
+                        window.location.href = "/"
+                    },3000);
+                }else {
+                    $('.alert-danger strong').empty()
+                    $('.alert-danger').removeClass('d-none')
+                    $(".alert-danger strong").append("Erro ao excluir registro.")
+                    setTimeout(function(){
+                        $('.alert-danger').addClass('d-none')
+                    },3000)
+                }
+			}
+		});
+	})();
+</script>

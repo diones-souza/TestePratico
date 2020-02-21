@@ -1,0 +1,118 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+<div class="alert alert-success alert-dismissible fade show animated zoomIn d-none" role="alert">
+    <strong></strong>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<div class="alert alert-danger alert-dismissible fade show animated zoomIn d-none" role="alert">
+    <strong></strong>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<div class="card">
+    <h5 class="card-header text-white bg-primary animated fadeInDown">Listar pessoas</h5>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-borderless table-hover">
+                <thead class="shadow-sm">
+                <tr>
+                    <th class="text-center" scope="col">#</th>
+                    <th class="text-center" scope="col">Nome</th>
+                    <th class="text-center" scope="col">Idade</th>
+                    <th class="text-center" scope="col">Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td class="text-center">@person.id</td>
+                    <td class="text-center">@person.name</td>
+                    <td class="text-center">@person.age</td>
+                    <td class="text-center">
+                        <div class="d-inline-flex">
+                            <a href="/@person.id" class="btn btn-outline-secondary mr-2"><i class="fas fa-edit"></i></a>
+                            <form method="POST" action="/@person.id">
+                                <button id="barProgress" type="submit" class="btn btn-outline-danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="progressBar" class="form-group">
+            <div>
+                <div class="progress">
+                    <div class="bar progress-bar-striped progress-bar-animated bg-success"></div >
+                </div>
+                <div class="text-center">
+                    <div class="percent">0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+	$(document).ready(function () {
+		document.getElementById('progressBar').style.display = "none"
+	});
+
+	$('#barProgress').click(function () {
+		document.getElementById('progressBar').style.display = "inline"
+	});
+
+	(function() {
+
+		var bar = $('.bar')
+		var percent = $('.percent')
+		var status = $('#status')
+		var nameFile = ''
+		$('form').ajaxForm({
+			beforeSend: function() {
+				status.empty()
+				var percentVal = '0%'
+				bar.width(percentVal)
+				percent.html(percentVal)
+			},
+			uploadProgress: function(event, position, total, percentComplete) {
+				var percentVal = percentComplete + '%'
+				bar.width(percentVal)
+				percent.html(percentVal)
+			},
+			success: function(data) {
+				var percentVal = '100%'
+				nameFile = data
+				bar.width(percentVal)
+				percent.html(percentVal)
+
+			},
+			complete: function(xhr) {
+			    setTimeout(function(){
+                   document.getElementById('progressBar').style.display = "none"
+                },1300)
+			    if(xhr.status < 400){
+			        $('.alert-success strong').empty()
+                    $('.alert-success').removeClass('d-none')
+                    $(".alert-success strong").append("Registro excluido.")
+                    setTimeout(function(){
+                        $('.alert-success').addClass('d-none')
+                        window.location.href = "/people"
+                    },3000)
+                }else {
+                    $('.alert-danger strong').empty()
+                    $('.alert-danger').removeClass('d-none')
+                    $(".alert-danger strong").append("Erro ao excluir registro.")
+                    setTimeout(function(){
+                        $('.alert-danger').addClass('d-none')
+                    },3000)
+                }
+			}
+		});
+	})();
+</script>
