@@ -2,10 +2,11 @@
 // param cache (boolean que indica se vai limpar o campo cidades)
 function getCities(uf,cache=false){
     let city = $('#city').val()
-    cache ? $('#cities').html('<option selected>Selecione a cidade</option>') : null
-    //faz consulta na api do ibge para trazer os municipios de um estado especificado
+    cache ? $('#cities').html('<option selected disabled>Selecione a cidade</option>') : null
+    //faz consulta para trazer os municipios de um estado especificado
     $.ajax({
-        url: `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`,
+        url: "Person/cities",
+        data:`uf=${uf}`,
         dataType: "json",
         success:function(data) {
             data.map(item =>{
@@ -20,9 +21,9 @@ function getCities(uf,cache=false){
 }
 $(function(){
     let uf = $('#uf').val()
-    //faz consulta na api do ibge para trazer estados
+    //faz consulta para trazer estados
     $.ajax({
-        url: "https://servicodados.ibge.gov.br/api/v1/localidades/estados",
+        url: "Person/states",
         dataType: "json",
         success:function(data) {
             data.map(item =>{

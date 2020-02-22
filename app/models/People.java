@@ -23,8 +23,10 @@ public class People extends Model{
     //campo obrigatório, no mínimo 16 no máximo 64
     public Integer age;
 
+    @Required
     public Integer uf;
 
+    @Required
     public Integer city;
 
     public Long getId() {

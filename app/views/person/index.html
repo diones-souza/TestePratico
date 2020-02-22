@@ -29,12 +29,18 @@
                 <select id="states" name="person.uf" class="form-control mb-2">
                     <option selected disabled>Selecione o estado</option>
                 </select>
+                <span class="alert-danger m-2">
+                    #{error 'person.uf' /}
+                </span>
             </div>
             <div class="form-group">
                 <input id="city" value="${person?.city}" hidden/>
                 <label>Cidade</label>
                 <select id="cities" name="person.city" class="form-control mb-2">
                 </select>
+                <span class="alert-danger m-2">
+                    #{error 'person.city' /}
+                </span>
             </div>
             <div class="float-right">
                 <button type="submit" class="btn btn-primary">Salvar</button>

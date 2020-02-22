@@ -4,6 +4,10 @@ import play.*;
 import play.mvc.*;
 import play.data.validation.*;
 import play.cache.*;
+import play.libs.WS;
+import play.libs.WS.*;
+import org.w3c.dom.Document;
+import com.google.gson.JsonElement;
 import java.util.*;
 import models.People;
 
@@ -12,7 +16,7 @@ public class Person extends Controller {
     public static void index() {
         //pegar model no cache
         People person = (People)Cache.get("person");
-        //limpa o model do cache
+        //limpar o model do cache
         Cache.set("person", null);
         render(person);
     }
@@ -41,7 +45,7 @@ public class Person extends Controller {
     public static void edit(Long id) {
         //buscar registro
         People person = People.findById(id);
-        renderTemplate("Person/index.html",person);
+        renderTemplate("person/index.html",person);
     }
 
     public static void destroy(Long id) {
@@ -50,5 +54,32 @@ public class Person extends Controller {
         person.delete();
         flash.success("Registro excluido");
         list();
+    }
+
+    public void states(){
+        JsonElement result = this.getStates();
+        renderJSON(result);
+    }
+
+    public void cities(Long uf){
+        //fazer consulta na API do IBGE
+        JsonElement result = this.getCities(uf);
+        renderJSON(result);
+    }
+
+    protected JsonElement getStates(){
+        //fazer consulta na API do IBGE
+        HttpResponse response = WS
+                .url("https://servicodados.ibge.gov.br/api/v1/localidades/estados")
+                .get();
+        JsonElement result = response.getJson();
+        return result;
+    }
+
+    protected JsonElement getCities(Long uf){
+        HttpResponse response = WS
+                .url("https://servicodados.ibge.gov.br/api/v1/localidades/estados/"+uf+"/municipios")
+                .get();
+        return response.getJson();
     }
 }
