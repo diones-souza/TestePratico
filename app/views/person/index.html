@@ -12,16 +12,20 @@
             <div class="form-group">
                 <label>Nome</label>
                 <input type="text" id="name" name="person.name" value="${person?.name}" class="form-control mb-2"/>
-                <span class="alert-danger m-2">
-                    #{error 'person.name' /}
-                </span>
+                #{ifErrors}
+                    <span class="alert-danger m-2">
+                        #{error 'person.name' /}
+                    </span>
+                #{/ifErrors}
             </div>
             <div class="form-group">
                 <label>Idade</label>
                 <input type="number" id="age" name="person.age" value="${person?.age}" class="form-control mb-2"/>
-                <span class="alert-danger m-2">
-                    #{error 'person.age' /}
-                </span>
+                #{ifErrors}
+                    <span class="alert-danger m-2">
+                        #{error 'person.age' /}
+                    </span>
+                #{/ifErrors}
             </div>
             <div class="form-group">
                 <input id="uf" value="${person?.uf}" hidden/>
@@ -29,18 +33,22 @@
                 <select id="states" name="person.uf" class="form-control mb-2">
                     <option selected disabled>Selecione o estado</option>
                 </select>
-                <span class="alert-danger m-2">
-                    #{error 'person.uf' /}
-                </span>
+                #{ifErrors}
+                    <span class="alert-danger m-2">
+                        #{error 'person.uf' /}
+                    </span>
+                #{/ifErrors}
             </div>
             <div class="form-group">
                 <input id="city" value="${person?.city}" hidden/>
                 <label>Cidade</label>
                 <select id="cities" name="person.city" class="form-control mb-2">
                 </select>
+                #{ifErrors}
                 <span class="alert-danger m-2">
                     #{error 'person.city' /}
                 </span>
+                #{/ifErrors}
             </div>
             <div class="float-right">
                 <button type="submit" class="btn btn-primary">Salvar</button>
@@ -49,3 +57,11 @@
     </div>
 </div>
 <script src="@{'/public/js/main.js'}"></script>
+<script>
+    //buscar estados
+    getStates()
+    //buscar cidades referente
+    $('#states').change(function(){
+        getCities($('#states').val())
+    })
+</script>

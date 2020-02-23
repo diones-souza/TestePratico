@@ -3,12 +3,12 @@
     <head>
         <title>#{get 'title' /}</title>
         <meta charset="${_response_encoding}">
-        <link rel="stylesheet" media="screen" href="@{'/public/css/main.css'}">
         <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" />
         <link rel="stylesheet" href="@{'/public/css/animate.min.css'}" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" />
         <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+        <link rel="stylesheet" media="screen" href="@{'/public/css/main.css'}">
         #{get 'moreStyles' /}
         <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
@@ -20,25 +20,7 @@
         #{get 'moreScripts' /}
     </head>
     <body>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="@{Person.index}">
-                <img src="@{'/public/images/play.png'}" width="30" height="40" class="d-inline-block align-center">
-                Play
-            </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li id="register" class="nav-item">
-                        <a class="nav-link" href="@{Person.index}">Cadastro </a>
-                    </li>
-                    <li id="list" class="nav-item">
-                        <a class="nav-link" href="@{Person.list}">Listar </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+        #{include 'navbar.html' /}
         <div class="container mt-4">
             #{if flash.success}
                 <div class="alert alert-success alert-dismissible fade show animated zoomIn" role="alert">
@@ -64,13 +46,17 @@
     $(document).ready(function () {
 		let host = location.pathname
 		host = host.replace('/','')
-		if(host == '' || host == 'person/edit'){
-			$("#register").addClass("active")
-			$("#list").removeClass("active")
+		if(host == '' || host == 'person/edit' || host == 'person/vacations'){
+            $("#register").addClass("active")
+            if(host == ''){
+                $("#person").addClass("active")
+            }
+            if(host == 'person/vacations'){
+                $("#vacations").addClass("active")
+            }
 		}else{
 			if(host == 'people'){
 				$("#list").addClass("active")
-				$("#register").removeClass("active")
 			}
 		}
 	})

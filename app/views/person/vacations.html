@@ -1,0 +1,102 @@
+#{extends 'main.html' /}
+#{set title:'Cadastro de férias' /}
+<div class="card">
+    <h5 class="card-header text-white bg-primary animated fadeInDown">Cadastrar período de férias</h5>
+    <div class="card-body">
+        <form>
+            <div class="form-group">
+                <label>Pessoa</label>
+                <select id="person" name="person.splitPeriod" class="form-control mb-2">
+                    <option selected value="0" disabled>Selecione a pessoa</option>
+                    #{list items:people, as:'person' } 
+                        <option value="${person.id}">${person.id} - ${person.name}</option>
+                    #{/list}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Dividir período</label>
+                <select id="splitPeriod" name="person.splitPeriod" class="form-control mb-2">
+                    <option selected value="1">Não dividir</option>
+                    <option>2</option>
+                    <option>3</option>
+                </select>
+                <span id="splitPeriodError" class="alert-danger m-2 d-none"></span>
+            </div>
+            <div class="form-group">
+                <label>Período <span id="oneDateDays" class="badge badge-primary"></span></label>
+                <input id="oneDateStart" type="text" class="form-control" hidden />
+                <input id="oneDateEnd" type="text" class="form-control" hidden />
+                <input type="text" name="oneDateRange" class="form-control mb-2" />
+                <span id="oneSplitPeriodError" class="alert-danger m-2 d-none"></span>
+            </div>
+            <div id="twoDateRange" class="form-group d-none">
+                <label>Segundo Período <span id="twoDateDays" class="badge badge-primary"></span></label>
+                <input id="twoDateStart" type="text" class="form-control" hidden />
+                <input id="twoDateEnd" type="text" class="form-control" hidden />
+                <input type="text" name="twoDateRange" class="form-control mb-2" />
+                <span id="twoSplitPeriodError" class="alert-danger m-2 d-none"></span>
+            </div>
+            <div id="threeDateRange" class="form-group d-none">
+                <label>Terceiro Período <span id="threeDateDays" class="badge badge-primary"></span></label>
+                <input id="threeDateStart" type="text" class="form-control" hidden />
+                <input id="threeDateEnd" type="text" class="form-control" hidden />
+                <input type="text" name="threeDateRange" value="person.daterange3" class="form-control mb-2" />
+                <span id="threeSplitPeriodError" class="alert-danger m-2 d-none"></span>
+            </div>
+            <div class="float-right">
+                <button type="button" onclick="validate()" class="btn btn-primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="@{'/public/js/main.js'}"></script>
+<script>
+    // validar regras do form de Cadastrar Ferias
+    function validate() {
+        //validar regras de periodos
+        if(validateSplitPeriod()){
+            //validar regras de fim de semana e feriados
+            if(validateWeekend()){
+                //buscar feriados
+                $.ajax({
+                    url: "/Vacation/index",
+                    data: `year=2020&uf=ms&dourados`,
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data)
+                    }
+                })
+            }
+        }
+    }
+    // verificar alteração no campo estado
+    $('#states').change(function () {
+        // buscar cidade referente
+        getCities($('#states').val(), true)
+    })
+    //inicia daterange no input
+    setDatePicker('input[name="oneDateRange"]', '#oneDateStart', '#oneDateEnd', '#oneDateDays')
+    //inicia daterange no input
+    setDatePicker('input[name="twoDateRange"]', '#twoDateStart', '#twoDateEnd', '#twoDateDays')
+    //inicia daterange no input
+    setDatePicker('input[name="threeDateRange"]', '#threeDateStart', '#threeDateEnd', '#threeDateDays')
+    // verificar alteração no campo dividir periodo
+    $('#splitPeriod').change(function () {
+        //pegar valor do campo dividir periodo
+        const splitPeriod = $('#splitPeriod').val()
+        //exibir ou campos dos periodos conforme o valor do campo divir periodo
+        if (splitPeriod == 1) {
+            $('#twoDateRange').addClass('d-none')
+            $('#threeDateRange').addClass('d-none')
+        }
+        if (splitPeriod == 2) {
+            $('#twoDateRange').removeClass('d-none')
+            $('#threeDateRange').addClass('d-none')
+        }
+        if (splitPeriod == 3) {
+            $('#twoDateRange').removeClass('d-none')
+            $('#threeDateRange').removeClass('d-none')
+        }
+    })
+
+</script>

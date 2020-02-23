@@ -67,7 +67,7 @@ public class Person extends Controller {
         renderJSON(result);
     }
 
-    protected JsonElement getStates(){
+    private JsonElement getStates(){
         //fazer consulta na API do IBGE
         HttpResponse response = WS
                 .url("https://servicodados.ibge.gov.br/api/v1/localidades/estados")
@@ -76,10 +76,20 @@ public class Person extends Controller {
         return result;
     }
 
-    protected JsonElement getCities(Long uf){
+    private JsonElement getCities(Long uf){
         HttpResponse response = WS
                 .url("https://servicodados.ibge.gov.br/api/v1/localidades/estados/"+uf+"/municipios")
                 .get();
         return response.getJson();
+    }
+
+    public static void vacations(){
+        //buscar registros
+        List<People> people = People.findAll();
+        render(people);
+    }
+
+    public void saveVacations(){
+        
     }
 }
