@@ -1,21 +1,28 @@
 #{extends 'main.html' /}
 #{set title:'Cadastro de férias' /}
+<div class="alert alert-success alert-dismissible show fade animated zoomIn d-none" role="alert">
+    <strong>Registro salvo</strong>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
 <div class="card">
     <h5 class="card-header text-white bg-primary animated fadeInDown">Cadastrar período de férias</h5>
     <div class="card-body">
         <form>
             <div class="form-group">
                 <label>Pessoa</label>
-                <select id="person" name="person.splitPeriod" class="form-control mb-2">
-                    <option selected value="0" disabled>Selecione a pessoa</option>
-                    #{list items:people, as:'person' } 
-                        <option value="${person.id}">${person.id} - ${person.name}</option>
+                <select id="personId" class="form-control mb-2">
+                    <option selected disabled>Selecione a pessoa</option>
+                    #{list items:people, as:'person' }
+                    <option value="${person.id}">${person.id} - ${person.name}</option>
                     #{/list}
                 </select>
+                <span id="personError" class="alert-danger m-2 d-none"></span>
             </div>
             <div class="form-group">
                 <label>Dividir período</label>
-                <select id="splitPeriod" name="person.splitPeriod" class="form-control mb-2">
+                <select id="splitPeriod" class="form-control mb-2">
                     <option selected value="1">Não dividir</option>
                     <option>2</option>
                     <option>3</option>
@@ -44,36 +51,152 @@
                 <span id="threeSplitPeriodError" class="alert-danger m-2 d-none"></span>
             </div>
             <div class="float-right">
-                <button type="button" onclick="validate()" class="btn btn-primary">Salvar</button>
+                <button type="button" onclick="save()" class="btn btn-primary">Salvar</button>
             </div>
         </form>
     </div>
 </div>
 <script src="@{'/public/js/main.js'}"></script>
 <script>
-    // validar regras do form de Cadastrar Ferias
-    function validate() {
-        //validar regras de periodos
-        if(validateSplitPeriod()){
-            //validar regras de fim de semana e feriados
-            if(validateWeekend()){
-                //buscar feriados
-                $.ajax({
-                    url: "/Vacation/index",
-                    data: `year=2020&uf=ms&dourados`,
-                    dataType: "json",
-                    success: function (data) {
-                        console.log(data)
-                    }
-                })
+    function save(){
+        const personId = $('#personId').val()
+        const oneDateStart = $('#oneDateStart').val()
+        const oneDateEnd = $('#oneDateEnd').val()
+        const twoDateStart = $('#twoDateStart').val()
+        const twoDateEnd = $('#twoDateEnd').val()
+        const threeDateStart = $('#threeDateStart').val()
+        const threeDateEnd = $('#threeDateEnd').val()
+        if(validate()){
+            if(oneDateStart){
+                saveVacation(personId, oneDateStart, oneDateEnd)
+            }
+            if(twoDateStart){
+                saveVacation(personId, twoDateStart, twoDateEnd)
+            }
+            if(threeDateStart){
+                saveVacation(personId, threeDateStart, threeDateEnd)
             }
         }
     }
-    // verificar alteração no campo estado
-    $('#states').change(function () {
-        // buscar cidade referente
-        getCities($('#states').val(), true)
-    })
+    // validar regras do form de Cadastrar Ferias
+    async function validate() {
+        //ocutar span de mensagens
+        $('#personError').addClass('d-none')
+        $('#splitPeriodError').addClass('d-none')
+        $('#oneSplitPeriodError').addClass('d-none')
+        $('#twoSplitPeriodError').addClass('d-none')
+        $('#threeSplitPeriodError').addClass('d-none')
+        //pegar id da pessoa selecionada
+        const id = $('#personId').val()
+        //pegar ano do periodo
+        const year = moment($('#oneDateStart').val(), 'DD/MM/YYYY').get('year')
+        //validar regras de periodos
+        if (validateSplitPeriod()) {
+            //validar regras de fim de semana e feriados
+            if (validateWeekend()) {
+                if (id) {
+                    const person = await getPerson(id)
+                    const holidays = await getHolidays(year, person.uf, person.city)
+                    const oneDateStart = $('#oneDateStart').val()
+                    const twoDateStart = $('#twoDateStart').val()
+                    const threeDateStart = $('#threeDateStart').val()
+                    let errors = []
+                    holidays.map(item => {
+                        if (oneDateStart) {
+                            if(oneDateStart != item.date){
+                                const oneDiff = moment(oneDateStart, 'DD/MM/YYYY')
+                                const holidayDiff = moment(item.date, 'DD/MM/YYYY')
+                                const diff = holidayDiff.diff(oneDiff, 'days')
+                                if(!(diff < 0 || diff > 3)){
+                                    errors.push({'oneError':item})
+                                }
+                            }else{
+                                errors.push({'oneError':item})
+                            }
+                        }
+                        if (twoDateStart) {
+                            if(twoDateStart != item.date){
+                                const twoDiff = moment(twoDateStart, 'DD/MM/YYYY')
+                                const holidayDiff = moment(item.date, 'DD/MM/YYYY')
+                                const diff = holidayDiff.diff(twoDiff, 'days')
+                                if(!(diff < 0 || diff > 3)){
+                                    errors.push({'twoError':item})
+                                }
+                            }else{
+                                errors.push({'twoError':item})
+                            }
+                        }
+                        if (threeDateStart) {
+                            if(threeDateStart != item.date){
+                                const threeDiff = moment(threeDateStart, 'DD/MM/YYYY')
+                                const holidayDiff = moment(item.date, 'DD/MM/YYYY')
+                                const diff = holidayDiff.diff(threeDiff, 'days')
+                                if(!(diff < 0 || diff > 3)){
+                                    errors.push({'threeError':item})
+                                }
+                            }else{
+                                errors.push({'threeError':item})
+                            }
+                        }
+                    })
+                    if(errors.length){
+                        $('#splitPeriodError').removeClass('d-none')
+                        $('#splitPeriodError').html('Os períodos devem respeitar a antecedência mínima de 3 dias antes de feriados')
+                        $('#oneSplitPeriodError').html('')
+                        $('#twoSplitPeriodError').html('')
+                        $('#threeSplitPeriodError').html('')
+                        errors.map(item =>{
+                            if(item.oneError){
+                                $('#oneSplitPeriodError').removeClass('d-none')
+                                $('#oneSplitPeriodError').append("<ul><li>"+
+                                    item.oneError.name+
+                                    "<ul><li>"+
+                                        item.oneError.date+
+                                        "<li>"+item.oneError.type+
+                                        "</li>"+
+                                        "<li>"+item.oneError.description+
+                                        "</li>"+
+                                    "</li></ul>"+
+                                "</li></ul>")
+                            }
+                            if(item.twoError){
+                                $('#twoSplitPeriodError').removeClass('d-none')
+                                $('#twoSplitPeriodError').append("<ul><li>"+
+                                    item.twoError.name+
+                                    "<ul><li>"+
+                                        item.twoError.date+
+                                        "<li>"+item.twoError.type+
+                                        "</li>"+
+                                        "<li>"+item.twoError.description+
+                                        "</li>"+
+                                    "</li></ul>"+
+                                "</li></ul>")
+                            }
+                            if(item.threeError){
+                                $('#threeSplitPeriodError').removeClass('d-none')
+                                $('#threeSplitPeriodError').append("<ul><li>"+
+                                    item.threeError.name+
+                                    "<ul><li>"+
+                                        item.threeError.date+
+                                        "<li>"+item.threeError.type+
+                                        "</li>"+
+                                        "<li>"+item.threeError.description+
+                                        "</li>"+
+                                    "</li></ul>"+
+                                "</li></ul>")
+                            }
+                        })
+                    }else{
+                        return true
+                    }
+                } else {
+                    $('#personError').removeClass('d-none')
+                    $('#personError').html('Informe uma pessoa')
+                }
+            }
+        }
+        return false
+    }
     //inicia daterange no input
     setDatePicker('input[name="oneDateRange"]', '#oneDateStart', '#oneDateEnd', '#oneDateDays')
     //inicia daterange no input
@@ -97,6 +220,10 @@
             $('#twoDateRange').removeClass('d-none')
             $('#threeDateRange').removeClass('d-none')
         }
+        validate()
+    })
+    $('#personId').change(function () {
+        validate()
     })
 
 </script>

@@ -1,15 +1,16 @@
 function setDatePicker(input, idStart, idEnd, idDays) {
     //inicia daterange no input
     $(input).daterangepicker(settingsDataRange(),
-        function (start, end) {
+        async function (start, end) {
+            //pegar id da pessoa selecionada
+            const id = $('#personId').val()
+            //pegar ano do periodo
+            const year = moment($('#oneDateStart').val(), 'DD/MM/YYYY').get('year')
             //mudar valor dos campos periodo
             setDateValue(idStart, start)
             setDateValue(idEnd, end)
             $(idDays).html(end.diff(start, 'days') + " dias")
-            if(validateSplitPeriod()){
-                //validar regras de fim de semana e feriados
-                validateWeekend()
-            }
+            validate()
         }
     )
 }
@@ -22,7 +23,7 @@ function validateWeekend(){
     const splitPeriod = $('#splitPeriod').val()
     //validar periodos
     if(splitPeriod == 1){
-        const oneDateStart = moment($('#oneDateStart').val(), 'DD').weekday()
+        const oneDateStart = moment($('#oneDateStart').val(), 'DD/MM/YYYY').weekday()
         if( oneDateStart > 0 && oneDateStart < 5){
             return true
         }else {
@@ -31,11 +32,14 @@ function validateWeekend(){
         }
     }
     if(splitPeriod == 2){
-        const oneDateStart = moment($('#oneDateStart').val(), 'DD').weekday()
-        const twoDateStart = moment($('#twoDateStart').val(), 'DD').weekday()
+        const oneDateStart = moment($('#oneDateStart').val(), 'DD/MM/YYYY').weekday()
+        const twoDateStart = moment($('#twoDateStart').val(), 'DD/MM/YYYY').weekday()
         if(oneDateStart > 0 && oneDateStart < 5){
             if(twoDateStart > 0 && twoDateStart < 5){
                 return true
+            }else{
+                $('#twoSplitPeriodError').removeClass('d-none')
+                $('#twoSplitPeriodError').html('O período deve iniciar de segunda a quinta')
             }
         }else {
             $('#oneSplitPeriodError').removeClass('d-none')
@@ -47,29 +51,32 @@ function validateWeekend(){
         }
     }
     if(splitPeriod == 3){
-        const oneDateStart = moment($('#oneDateStart').val(), 'DD')
-        const twoDateStart = moment($('#twoDateStart').val(), 'DD')
-        const threeDateEnd = moment($('#threeDateEnd').val(), 'DD')
-        if(oneDateStart.weekday() < 5){
-            validated = true
+        const oneDateStart = moment($('#oneDateStart').val(), 'DD/MM/YYYY').weekday()
+        const twoDateStart = moment($('#twoDateStart').val(), 'DD/MM/YYYY').weekday()
+        const threeDateStart = moment($('#threeDateStart').val(), 'DD/MM/YYYY').weekday()
+        if(oneDateStart > 0 && oneDateStart < 5){
+            if(twoDateStart > 0 && twoDateStart < 5){
+                if(threeDateStart > 0 && threeDateStart < 5){
+                    return true
+                }else{
+                    $('#threeSplitPeriodError').removeClass('d-none')
+                    $('#threeSplitPeriodError').html('O período deve iniciar de segunda a quinta')
+                }
+            }else{
+                $('#twoSplitPeriodError').removeClass('d-none')
+                $('#twoSplitPeriodError').html('O período deve iniciar de segunda a quinta')
+            }
         }else {
-            validated = false
             $('#oneSplitPeriodError').removeClass('d-none')
             $('#oneSplitPeriodError').html('O período deve iniciar de segunda a quinta')
         }
-        if(twoDateStart.weekday() < 5){
-            validated = true
-        }else {
-            validated = false
+        if(twoDateStart > 4){
             $('#twoSplitPeriodError').removeClass('d-none')
             $('#twoSplitPeriodError').html('O período deve iniciar de segunda a quinta')
         }
-        if(threeDateEnd.weekday() < 5){
-            validated = true
-        }else {
-            validated = false
+        if(threeDateStart > 4){
             $('#threeSplitPeriodError').removeClass('d-none')
-            $('#twoSplitPeriodError').html('O período deve iniciar de segunda a quinta')
+            $('#threeSplitPeriodError').html('O período deve iniciar de segunda a quinta')
         }
     }
     return false
@@ -124,9 +131,18 @@ function splitPeriodValidation(filter) {
         if (oneDateStart._isValid && oneDateEnd._isValid) {
             //calcular quantidade de dias entre a data de inicio e fim
             const oneDiff = parseInt(oneDateEnd.diff(oneDateStart, 'days'))
+            //pegar ano de inicio e de fim
+            const yearStart = parseInt(oneDateStart.format('YYYY'))
+            const yearEnd = parseInt(oneDateEnd.format('YYYY'))
             //ferias completa deve ter 30 dias
             if (oneDiff == 30) {
-                return true
+                //os periodos devem iniciar e findar no mesmo ano
+                if(yearStart == yearEnd){
+                    return true
+                }else{
+                    $('#splitPeriodError').removeClass('d-none')
+                    $('#splitPeriodError').html('Os período devem iniciar e findar no mesmo ano')
+                }
             } else {
                 $('#oneSplitPeriodError').removeClass('d-none')
                 $('#oneSplitPeriodError').html('O período deve ser 30 dias')
@@ -173,6 +189,9 @@ function splitPeriodValidation(filter) {
         }
         //calcular periodos para saber se sao distintos
         const oneTwoDiff = parseInt(twoDateStart.diff(oneDateEnd, 'days'))
+        //pegar ano de inicio e de fim
+        const yearStart = parseInt(oneDateStart.format('YYYY'))
+        const yearEnd = parseInt(twoDateEnd.format('YYYY'))
         //regra de ferias dividas não deve ter periodo maior que 20 dias e um dos peridos deve ter no minimo 14 dias 
         if (oneDiff >= 14 && oneDiff <= 20) {
             //soma os dias dos periodos
@@ -181,10 +200,16 @@ function splitPeriodValidation(filter) {
             if (sum == 30) {
                 //verificar se os periodos sao distintos
                 if (oneTwoDiff > 0) {
-                    return true
+                    //os periodos devem iniciar e findar no mesmo ano
+                    if(yearStart == yearEnd){
+                        return true
+                    }else{
+                        $('#splitPeriodError').removeClass('d-none')
+                        $('#splitPeriodError').html('Os período devem iniciar e findar no mesmo ano')
+                    }
                 } else {
                     $('#splitPeriodError').removeClass('d-none')
-                    $('#splitPeriodError').html('Os períodos deve ser distintos (segundo período deve iniciar somente após o primeiro)')
+                    $('#splitPeriodError').html('Os períodos deve ser distintos e o segundo período deve iniciar somente após o primeiro')
                 }
             } else {
                 $('#splitPeriodError').removeClass('d-none')
@@ -203,7 +228,13 @@ function splitPeriodValidation(filter) {
                 if (sum == 30) {
                     //verificar se os periodos sao distintos
                     if (oneTwoDiff > 0) {
-                        return true
+                        //os periodos devem iniciar e findar no mesmo ano
+                        if(yearStart == yearEnd){
+                            return true
+                        }else{
+                            $('#splitPeriodError').removeClass('d-none')
+                            $('#splitPeriodError').html('Os período devem iniciar e findar no mesmo ano')
+                        }
                     } else {
                         $('#splitPeriodError').removeClass('d-none')
                         $('#splitPeriodError').html('Os períodos deve ser distintos')
@@ -292,6 +323,9 @@ function splitPeriodValidation(filter) {
         //calcular periodos para saber se sao distintos
         const oneTwoDiff = parseInt(twoDateStart.diff(oneDateEnd, 'days'))
         const twoThreeDiff = parseInt(threeDateStart.diff(twoDateEnd, 'days'))
+        //pegar ano de inicio e de fim
+        const yearStart = parseInt(oneDateStart.format('YYYY'))
+        const yearEnd = parseInt(threeDateEnd.format('YYYY'))
         //regra de ferias dividas não deve ter periodo maior que 20 dias e um dos peridos deve ter no minimo 14 dias 
         if (oneDiff >= 14 && oneDiff <= 20) {
             //soma os dias dos periodos
@@ -302,14 +336,20 @@ function splitPeriodValidation(filter) {
                 if (oneDiff >= 5 && twoDiff >= 5 && threeDiff >= 5) {
                     if (oneTwoDiff > 0) {
                         if (twoThreeDiff > 0) {
-                            return true
+                            //os periodos devem iniciar e findar no mesmo ano
+                            if(yearStart == yearEnd){
+                                return true
+                            }else{
+                                $('#splitPeriodError').removeClass('d-none')
+                                $('#splitPeriodError').html('Os período devem iniciar e findar no mesmo ano')
+                            }
                         } else {
                             $('#splitPeriodError').removeClass('d-none')
-                            $('#splitPeriodError').html('Os períodos deve ser distintos (terceiro período deve iniciar somente após o segundo)')
+                            $('#splitPeriodError').html('Os períodos deve ser distintos e o terceiro período deve iniciar somente após o segundo')
                         }
                     } else {
                         $('#splitPeriodError').removeClass('d-none')
-                        $('#splitPeriodError').html('Os períodos deve ser distintos (segundo período deve iniciar somente após o primeiro)')
+                        $('#splitPeriodError').html('Os períodos deve ser distintos e o segundo período deve iniciar somente após o primeiro')
                     }
                 }
             } else {
@@ -331,14 +371,20 @@ function splitPeriodValidation(filter) {
                     if (oneDiff >= 5 && twoDiff >= 5 && threeDiff >= 5) {
                         if (oneTwoDiff > 0) {
                             if (twoThreeDiff > 0) {
-                                return true
+                                //os periodos devem iniciar e findar no mesmo ano
+                                if(yearStart == yearEnd){
+                                    return true
+                                }else{
+                                    $('#splitPeriodError').removeClass('d-none')
+                                    $('#splitPeriodError').html('Os período devem iniciar e findar no mesmo ano')
+                                }
                             } else {
                                 $('#splitPeriodError').removeClass('d-none')
-                                $('#splitPeriodError').html('Os períodos deve ser distintos (terceiro período deve iniciar somente após o segundo)')
+                                $('#splitPeriodError').html('Os períodos deve ser distintos e o terceiro período deve iniciar somente após o segundo')
                             }
                         } else {
                             $('#splitPeriodError').removeClass('d-none')
-                            $('#splitPeriodError').html('Os períodos deve ser distintos (segundo período deve iniciar somente após o primeiro)')
+                            $('#splitPeriodError').html('Os períodos deve ser distintos e o segundo período deve iniciar somente após o primeiro')
                         }
                     }
                 } else {
@@ -359,14 +405,20 @@ function splitPeriodValidation(filter) {
                         if (oneDiff >= 5 && twoDiff >= 5 && threeDiff >= 5) {
                             if (oneTwoDiff > 0) {
                                 if (twoThreeDiff > 0) {
-                                    return true
+                                    //os periodos devem iniciar e findar no mesmo ano
+                                    if(yearStart == yearEnd){
+                                        return true
+                                    }else{
+                                        $('#splitPeriodError').removeClass('d-none')
+                                        $('#splitPeriodError').html('Os período devem iniciar e findar no mesmo ano')
+                                    }
                                 } else {
                                     $('#splitPeriodError').removeClass('d-none')
-                                    $('#splitPeriodError').html('Os períodos deve ser distintos (terceiro período deve iniciar somente após o segundo)')
+                                    $('#splitPeriodError').html('Os períodos deve ser distintos e o terceiro período deve iniciar somente após o segundo')
                                 }
                             } else {
                                 $('#splitPeriodError').removeClass('d-none')
-                                $('#splitPeriodError').html('Os períodos deve ser distintos (segundo período deve iniciar somente após o primeiro)')
+                                $('#splitPeriodError').html('Os períodos deve ser distintos e o segundo período deve iniciar somente após o primeiro')
                             }
                         }
                     } else {
@@ -388,10 +440,9 @@ function splitPeriodValidation(filter) {
 }
 // buscar cidades
 // param uf (codigo ibge do estado)
-// param cache (boolean que indica se vai limpar o campo cidades)
-function getCities(uf, cache = false) {
+function getCities(uf) {
     let city = $('#city').val()
-    cache ? $('#cities').html('<option selected disabled>Selecione a cidade</option>') : null
+    $('#cities').html('<option selected disabled>Selecione a cidade</option>')
     //faz consulta para trazer os municipios de um estado especificado
     $.ajax({
         url: "/Person/cities",
@@ -399,7 +450,7 @@ function getCities(uf, cache = false) {
         dataType: "json",
         success: function (data) {
             data.map(item => {
-                var option = `<option value="${item.id}">${item.nome}</option>`
+                var option = `<option>${item.nome}</option>`
                 $('#cities').append(option)
             })
             if (city) {
@@ -418,14 +469,41 @@ function getStates() {
         dataType: "json",
         success: function (data) {
             data.map(item => {
-                var option = `<option value="${item.id}">${item.nome}</option>`
+                var option = `<option value="${item.id} - ${item.sigla}">${item.nome}</option>`
                 $('#states').append(option)
             })
             if (uf) {
-                getCities(uf)
+                getCities(parseInt(uf))
                 $('#states').val(uf)
             }
         }
+    })
+}
+// buscar registro de pessoa
+async function getPerson(id){
+    // faz consulta para trazer registro da pessoa
+    return new Promise(resolve =>{
+        $.ajax({
+            url: "/Person/person",
+            data: `id=${id}`,
+            success: function (data) {
+                resolve(data)
+            }
+        })
+    })
+}
+//buscar feriados
+async function getHolidays(year, uf, city){
+    // faz consulta para trazer os feriados
+    return new Promise(resolve =>{
+        $.ajax({
+            url: "/Vacation/index",
+            data: `year=${year}&uf=${uf}&city=${city}`,
+            dataType: "json",
+            success: function (data) {
+                resolve(data)
+            }
+        })
     })
 }
 //configurações daterange
@@ -433,6 +511,7 @@ function settingsDataRange() {
     return {
         opens: 'right',
         drops: "up",
+        showDropdowns:true,
         locale: {
             format: "DD/MM/YYYY",
             separator: " a ",
@@ -465,19 +544,17 @@ function settingsDataRange() {
         },
     }
 }
-
-(function($){
-	$('.dropdown-menu a.dropdown-toggle').on('click', function(e) {
-	  if (!$(this).next().hasClass('show')) {
-		$(this).parents('.dropdown-menu').first().find('.show').removeClass("show");
-	  }
-	  var $subMenu = $(this).next(".dropdown-menu");
-	  $subMenu.toggleClass('show');
-
-	  $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function(e) {
-		$('.dropdown-submenu .show').removeClass("show");
-	  });
-
-	  return false;
-	});
-})(jQuery)
+//savar ferias
+function saveVacation(personId, start, end){
+    // feito com get pois fiquei sem tempo para validar (não é correto pois estou salvando registro)
+    $.ajax({
+        url: "/Vacation/save",
+        data: `personId=${personId}&start=${start}&end=${end}`,
+        success: function () {
+            $('.alert-success').removeClass('d-none')
+            setTimeout(() => {
+                $('.alert-success').addClass('d-none')
+            }, 3000);
+        }
+    })
+}

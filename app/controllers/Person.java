@@ -7,13 +7,13 @@ import play.cache.*;
 import play.libs.WS;
 import play.libs.WS.*;
 import org.w3c.dom.Document;
-import com.google.gson.JsonElement;
+import com.google.gson.*;
 import java.util.*;
 import models.People;
 
 public class Person extends Controller {
 
-    public static void index() {
+    public static void index(){
         //pegar model no cache
         People person = (People)Cache.get("person");
         //limpar o model do cache
@@ -21,13 +21,13 @@ public class Person extends Controller {
         render(person);
     }
 
-    public static void list() {
+    public static void list(){
         //buscar registros
         List<People> people = People.findAll();
         render(people);
     }
 
-    public static void save(@Valid People person) {
+    public static void save(@Valid People person){
         //verificar se há erros
         if(validation.hasErrors()){
             //guardar mensagens de erros
@@ -42,18 +42,30 @@ public class Person extends Controller {
         index();
     }
 
-    public static void edit(Long id) {
+    public static void edit(Long id){
         //buscar registro
         People person = People.findById(id);
         renderTemplate("person/index.html",person);
     }
 
-    public static void destroy(Long id) {
+    public static void destroy(Long id){
         //buscar registro
         People person = People.findById(id);
         person.delete();
         flash.success("Registro excluido");
         list();
+    }
+
+    public void person(Long id){
+        People person = People.findById(id);
+        String uf = person.uf.replaceAll("[0-9]", "");
+        String json = "{'id': "+person.id+", "
+                + "'name': '"+person.name+"',"
+                + "'age': "+person.age+","
+                + "'uf': '"+uf.replaceAll(" - ", "")+"',"
+                + "'city': '"+person.city+"'}";
+        JsonElement jsonElement = new JsonParser().parse(json);
+        renderJSON(jsonElement);
     }
 
     public void states(){
@@ -92,4 +104,5 @@ public class Person extends Controller {
     public void saveVacations(){
         
     }
+
 }

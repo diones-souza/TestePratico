@@ -42,22 +42,3 @@
         </div>
     </body>
 </html>
-<script type="text/javascript">
-    $(document).ready(function () {
-		let host = location.pathname
-		host = host.replace('/','')
-		if(host == '' || host == 'person/edit' || host == 'person/vacations'){
-            $("#register").addClass("active")
-            if(host == ''){
-                $("#person").addClass("active")
-            }
-            if(host == 'person/vacations'){
-                $("#vacations").addClass("active")
-            }
-		}else{
-			if(host == 'people'){
-				$("#list").addClass("active")
-			}
-		}
-	})
-</script>

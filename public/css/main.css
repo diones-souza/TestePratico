@@ -27,3 +27,7 @@ ul li a,
 .nav-link:hover{
     color:#ffffff;
 }
+
+.pointer {
+    cursor: pointer;
+}

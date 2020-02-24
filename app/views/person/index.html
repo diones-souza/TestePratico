@@ -1,5 +1,5 @@
 #{extends 'main.html' /}
-#{set title:'Cadastro' /}
+#{set title:'Cadastro de Pessoas' /}
 <div class="card">
     <h5 class="card-header text-white bg-primary animated fadeInDown">Cadastrar pessoa</h5>
     <div class="card-body">
@@ -62,6 +62,6 @@
     getStates()
     //buscar cidades referente
     $('#states').change(function(){
-        getCities($('#states').val())
+        getCities(parseInt($('#states').val()))
     })
 </script>

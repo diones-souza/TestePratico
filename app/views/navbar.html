@@ -8,20 +8,63 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
-            <li id="register" class="dropdown mt-2">
+            <li id="register" class="dropdown pointer mr-2">
                 <a role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Cadastro <i class="fas fa-caret-down"></i></a>
                 <ul class="dropdown-menu" aria-labelledby="register">
                     <li id="person" class="nav-item">
-                        <a class="nav-link" href="@{Person.index}">Pessoa </a>
+                        <a class="nav-link" href="@{Person.index}">Pessoas </a>
                     </li>
                     <li id="vacations" class="nav-item">
-                        <a class="nav-link" href="@{Person.vacations}">Período de férias </a>
+                        <a class="nav-link" href="@{Person.vacations}">Períodos de férias </a>
                     </li>
                 </ul>
             </li>
-            <li id="list" class="nav-item">
-                <a class="nav-link" href="@{Person.list}">Listar </a>
+            <li id="list" class="dropdown pointer mr-2">
+                <a role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Listar <i class="fas fa-caret-down"></i></a>
+                <ul class="dropdown-menu" aria-labelledby="register">
+                    <li id="personList" class="nav-item">
+                        <a class="nav-link" href="@{Person.list}">Pessoas </a>
+                    </li>
+                    <li id="vacationsList" class="nav-item">
+                        <a class="nav-link" href="@{Vacation.list}">Períodos de férias </a>
+                    </li>
+                </ul>
             </li>
         </ul>
     </div>
 </nav>
+<script type="text/javascript">
+    (function($){
+        $(document).ready(function () {
+            let host = location.pathname
+            host = host.replace('/','')
+            if(host == '' || host == 'person/edit' || host == 'person/vacations'){
+                $("#register").addClass("active")
+                if(host == ''){
+                    $("#person").addClass("active")
+                }
+                if(host == 'person/vacations'){
+                    $("#vacations").addClass("active")
+                }
+            }else{
+                if(host == 'people'){
+                    $("#list").addClass("active")
+                    $("#personList").addClass("active")
+                }
+            }
+        })
+        $('.dropdown-menu a.dropdown-toggle').on('click', function(e) {
+        if (!$(this).next().hasClass('show')) {
+            $(this).parents('.dropdown-menu').first().find('.show').removeClass("show");
+        }
+        var $subMenu = $(this).next(".dropdown-menu");
+        $subMenu.toggleClass('show');
+
+        $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function(e) {
+            $('.dropdown-submenu .show').removeClass("show");
+        });
+
+        return false;
+        });
+    })(jQuery)
+</script>

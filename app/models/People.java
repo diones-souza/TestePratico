@@ -24,10 +24,10 @@ public class People extends Model{
     public Integer age;
 
     @Required
-    public Integer uf;
+    public String uf;
 
     @Required
-    public Integer city;
+    public String city;
 
     public Long getId() {
         return id;
@@ -53,19 +53,19 @@ public class People extends Model{
         this.age = age;
     }
 
-    public Integer getUf() {
+    public String getUf() {
         return uf;
     }
 
-    public void setUf(Integer uf) {
+    public void setUf(String uf) {
         this.uf = uf;
     }
 
-    public Integer getCity() {
+    public String getCity() {
         return city;
     }
 
-    public void setCity(Integer city) {
+    public void setCity(String city) {
         this.city = city;
     }
 }
